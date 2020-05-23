@@ -52,7 +52,6 @@ end
 ---------------DO NOT EDIT BELOW THIS LINE UNLESS YOU ARE A DEVELOPER----------------
 -------------------------------------------------------------------------------------
 local staffwatch = "https://staffwatch.app"
---local staffwatch = "http://76.127.248.98"
 
 --Player Connection
 AddEventHandler(
