@@ -27,19 +27,11 @@ local appeal = "appeals.example.com"
 -------------------------------------------------------------------------------------------
 -- In-Game Message (For Advanced Users)
 function sendMessage(message)
-    --TriggerClientEvent('chat:addMessage', -1, {        ----------------------------------------------------------------------------
-    --        color = { 255, 0, 0},                      --- Have a custom chat plugin? Want to change the text format of messages?
-    --        multiline = true,                          --- Edit the TriggerClientEvent() function so it fits your needs!
-    --        args = {"[StaffWatch] "..message}          ----------------------------------------------------------------------------
-    --})
-    TriggerClientEvent(
-        "chat:addMessage",
-        -1,
-        {
-            template = '<div style="color=white; padding: 0.3vw; margin: 0.5vw; background-color: rgba(0, 224, 0, 0.6); border-radius: 3px;"><i class="fas fa-exclamation-triangle"></i> {0}</div>',
-            args = {"[StaffWatch] " .. message}
-        }
-    )
+    TriggerClientEvent('chat:addMessage', -1, {        ----------------------------------------------------------------------------
+           color = { 255, 0, 0},                      --- Have a custom chat plugin? Want to change the text format of messages?
+           multiline = true,                          --- Edit the TriggerClientEvent() function so it fits your needs!
+           args = {"[StaffWatch] "..message}          ----------------------------------------------------------------------------
+    })
 end
 -------------------------------------------------------------------------------------------
 
