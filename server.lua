@@ -35,14 +35,9 @@ function sendMessage(message)
 end
 -------------------------------------------------------------------------------------------
 
-
-
-
-
-
--------------------------------------------------------------------------------------
----------------DO NOT EDIT BELOW THIS LINE UNLESS YOU ARE A DEVELOPER----------------
--------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------
+---------------DO NOT EDIT BELOW THIS LINE UNLESS YOU ARE A LEGIT DEVELOPER----------------
+-------------------------------------------------------------------------------------------
 local staffwatch = "https://staffwatch.app"
 
 --Player Connection
@@ -50,15 +45,14 @@ AddEventHandler(
     "playerConnecting",
     function(name, setReason, deferrals)
         deferrals.defer()
-        deferrals.update("Verifying User ⏳")
 
-        if string.find(GetPlayerIdentifiers(source)[1], "steam:") then
+        if string.find(GetPlayerIdentifier(source, 0), "steam:") then
 
             local url = staffwatch .. "/api/updateuser?secret=" .. secret
             local bancheck = staffwatch .. "/api/checkban?secret=" .. secret
 
-            local steam = splitstring(GetPlayerIdentifiers(source)[1], ":")[2]
-            local license = splitstring(GetPlayerIdentifiers(source)[2], ":")[2]
+            local steam = splitstring(GetPlayerIdentifier(source, 0), ":")[2]
+            local license = splitstring(GetPlayerIdentifier(source, 1), ":")[2]
 
             url = url .. "&license=" .. license .. "&steam=" .. steam
             bancheck = bancheck .. "&license=" .. license .. "&steam=" .. steam
@@ -103,8 +97,14 @@ AddEventHandler(
                             message = inputReplace(message, "appeals", appeal)
                             deferrals.done(message)
                         else
+                            for x = 1, 6 do
+                                deferrals.update("Verifying User 💙")
+                                Wait(200)
+                                deferrals.update("Verifying User 🧡")
+                                Wait(200)
+                            end
                             deferrals.update("Verified User ✅")
-                            Wait(500)
+                            Wait(2000)
                             deferrals.done()
                         end
                     else
@@ -131,6 +131,82 @@ AddEventHandler(
     end
 )
 
+-- Warn User
+RegisterCommand(
+    "warn",
+    function(source, args, rawCommand)
+        local type = 'warn'
+        local staff = splitstring(GetPlayerIdentifier(source, 0), ":")[2]
+        local id = table.remove(args, 1)
+        local license = splitstring(GetPlayerIdentifier(id, 1), ":")[2]
+        local reason = table.concat(args, " ")
+        local url = staffwatch..'/api/performaction?secret='..secret..'&type='..type..'&staff='..staff..'&license='..license..'&id='..id..'&reason='..urlencode(reason)
+        PerformHttpRequest(url, function(statusCode, response, headers)
+            print(statusCode)
+            if tostring(statusCode) == '403' then
+                sendMessage('Invalid Permissions!', source)
+            end
+            if tostring(statusCode) == '400' then
+                sendMessage('Invalid Arguments!', source)
+            end
+        end)
+    end,
+    false
+)
+
+-- Kick User
+RegisterCommand(
+    "kick",
+    function(source, args, rawCommand)
+        local type = 'kick'
+        local staff = splitstring(GetPlayerIdentifier(source, 0), ":")[2]
+        local id = table.remove(args, 1)
+        local license = splitstring(GetPlayerIdentifier(id, 1), ":")[2]
+        local reason = table.concat(args, " ")
+        local url = staffwatch..'/api/performaction?secret='..secret..'&type='..type..'&staff='..staff..'&license='..license..'&id='..id..'&reason='..urlencode(reason)
+        PerformHttpRequest(url, function(statusCode, response, headers)
+            print(statusCode)
+            if tostring(statusCode) == '403' then
+                sendMessage('Invalid Permissions!', source)
+            end
+            if tostring(statusCode) == '400' then
+                sendMessage('Invalid Arguments!', source)
+            end
+        end)
+    end,
+    false
+)
+
+-- Ban User
+RegisterCommand(
+    "ban",
+    function(source, args, rawCommand)
+        local type = 'ban'
+        local staff = splitstring(GetPlayerIdentifier(source, 0), ":")[2]
+
+        local id = table.remove(args, 1)
+
+        local argString = table.concat(args, ' ')
+        local combined = splitstring(argString, '?')
+
+        local reason = combined[1]
+        local duration = combined[2]
+
+        local license = splitstring(GetPlayerIdentifier(id, 1), ":")[2]
+        local url = staffwatch..'/api/performaction?secret='..secret..'&type='..type..'&staff='..staff..'&license='..license..'&id='..id..'&reason='..urlencode(reason)..'&duration='..urlencode(duration)
+        PerformHttpRequest(url, function(statusCode, response, headers)
+            print(statusCode)
+            if tostring(statusCode) == '403' then
+                sendMessage('Invalid Permissions!', source)
+            end
+            if tostring(statusCode) == '400' then
+                sendMessage('Invalid Arguments!', source)
+            end
+        end)
+    end,
+    false
+)
+
 -- RCON Warn User
 RegisterCommand(
     "staffwatch_warnuser",
@@ -139,7 +215,8 @@ RegisterCommand(
             local id = table.remove(args, 1)
             local name = GetPlayerName(id)
             local reason = table.concat(args, " ")
-            sendMessage(name .. " (" .. id .. ") has been warned for " .. reason)
+            sendMessage(name .. " (" .. id .. ") has been warned for " .. reason, -1)
+            TriggerClientEvent('warnuser', id, reason)
         end
     end,
     false
@@ -154,7 +231,7 @@ RegisterCommand(
             local name = GetPlayerName(id)
             local reason = table.concat(args, " ")
             DropPlayer(id, reason)
-            sendMessage(name .. " (" .. id .. ") has been kicked for " .. reason)
+            sendMessage(name .. " (" .. id .. ") has been kicked for " .. reason, -1)
         end
     end,
     false
@@ -169,7 +246,7 @@ RegisterCommand(
             local name = GetPlayerName(id)
             local reason = table.concat(args, " ")
             DropPlayer(id, "You have been banned for: " .. reason .. " (Reconnect for Information)")
-            sendMessage(name .. " (" .. id .. ") has been banned for " .. reason)
+            sendMessage(name .. " (" .. id .. ") has been banned for " .. reason, -1)
         end
     end,
     false
@@ -184,14 +261,15 @@ function starts_with(str, start)
     return str:sub(1, #start) == start
 end
 
-function splitstring(inputstr, sep)
-    if sep == nil then
-        sep = "%s"
-    end
+function splitstring(str, delim)
     local t = {}
-    for str in string.gmatch(inputstr, "([^" .. sep .. "]+)") do
-        table.insert(t, str)
+
+    for substr in string.gmatch(str, "[^".. delim.. "]*") do
+        if substr ~= nil and string.len(substr) > 0 then
+            table.insert(t,substr)
+        end
     end
+
     return t
 end
 
