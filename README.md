@@ -5,7 +5,7 @@ Staff Watch gives you the ability to remove those toxic people breaking the rule
 Running a FiveM server is fun at times, but frustrating at others. There is nothing more annoying then a couple of kids raiding your server, then leaving before you can ban them with vMenu or EasyAdmin. Staff Watch will prevent this and much more.
 
 ## Setup
-Setup instructions can be found [on the wiki](https://github.com/AidenTheTechBoy/StaffWatch/wiki/1)-Setup)
+Setup instructions can be found [on the wiki](https://github.com/AidenTheTechBoy/StaffWatch/wiki)
 
 ## Features
 - Staff Actions
