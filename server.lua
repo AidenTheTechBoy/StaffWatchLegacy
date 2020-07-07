@@ -71,7 +71,7 @@ AddEventHandler(
                             message = inputReplace(message, "reason", user["reason"])
                             message = inputReplace(message, "expiration", user["end"])
                             message = inputReplace(message, "staff", user["staff"])
-                            message = inputReplace(message, "appeals", appeal)
+                            message = inputReplace(message, "appeals", Config.appeal)
                             deferrals.done(message)
                         else
                             for x = 1, 6 do
