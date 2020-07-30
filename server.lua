@@ -3,7 +3,7 @@
 -------------------------------------------------------------------------------------------
 -- In-Game Message (For Advanced Users)
 function sendMessage(message, scope)
-    TriggerClientEvent('chat:addMessage', -1, {        ----------------------------------------------------------------------------
+    TriggerClientEvent('chat:addMessage', scope, {        ----------------------------------------------------------------------------
            color = { 255, 0, 0},                      --- Have a custom chat plugin? Want to change the text format of messages?
            multiline = true,                          --- Edit the TriggerClientEvent() function so it fits your needs!
            args = {"[StaffWatch] "..message}          ----------------------------------------------------------------------------
