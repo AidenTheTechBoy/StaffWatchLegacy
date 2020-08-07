@@ -36,6 +36,22 @@ Citizen.CreateThread(function()
             {name = "reason?duration", help = "EX: /ban 3 RDM and VDM?2 Days"},
         }
     )
+    TriggerEvent(
+        "chat:addSuggestion",
+        "/freeze",
+        "Freeze a player through Staff Watch",
+        {
+            {name = "id", help = "Enter the server ID of the player you would like to freeze."}
+        }
+    )
+    TriggerEvent(
+        "chat:addSuggestion",
+        "/unfreeze",
+        "Unfreeze a player through Staff Watch",
+        {
+            {name = "id", help = "Enter the server ID of the player you would like to unfreeze."}
+        }
+    )
 end)
 
 -- Warning Notifications
@@ -44,14 +60,56 @@ local announcemessage = ''
 
 RegisterNetEvent('warnuser')
 AddEventHandler('warnuser', function(reason)
-    announce = true
-    announcemessage = reason
+    if not announce then
+        announce = true
+        announcemessage = reason
 
-    PlaySoundFrontend(-1, "DELETE","HUD_DEATHMATCH_SOUNDSET", 1)
+        PlaySoundFrontend(-1, "DELETE","HUD_DEATHMATCH_SOUNDSET", 1)
 
-    Citizen.Wait(7000)
-    
-	announce = false
+        Citizen.Wait(7000)
+        
+        announce = false
+    end
+end)
+
+-- Manage Being Frozen
+local frozenByStaff = false
+local wasFrozen = false
+
+RegisterNetEvent('setFrozen')
+AddEventHandler('setFrozen', function(frozen)
+    frozenByStaff = frozen
+
+    if frozen then
+        announce = true
+        announcemessage = 'You have been frozen by staff!'
+        PlaySoundFrontend(-1, "DELETE","HUD_DEATHMATCH_SOUNDSET", 1)
+        Citizen.Wait(2000)
+        announce = false
+    else
+        FreezeEntityPosition(GetPlayerPed(-1), false)
+        announce = true
+        announcemessage = 'You have been unfrozen by staff!'
+        PlaySoundFrontend(-1, "DELETE","HUD_DEATHMATCH_SOUNDSET", 1)
+        Citizen.Wait(2000)
+        announce = false
+    end
+
+end)
+
+Citizen.CreateThread(function()
+    while true do
+        Wait(0)
+        if frozenByStaff then
+            DisablePlayerFiring(GetPlayerPed(-1), true)
+            FreezeEntityPosition(GetPlayerPed(-1), true)
+            DisableControlAction(0, 71, true)
+            DisableControlAction(0, 72, true)
+            DisableControlAction(0, 22, true)
+        else
+            Wait(500)
+        end
+    end
 end)
 
 Citizen.CreateThread(function()

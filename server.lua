@@ -3,7 +3,7 @@
 -------------------------------------------------------------------------------------------
 -- In-Game Message (For Advanced Users)
 function sendMessage(message, scope)
-    TriggerClientEvent('chat:addMessage', -1, {        ----------------------------------------------------------------------------
+    TriggerClientEvent('chat:addMessage', scope, {        ----------------------------------------------------------------------------
            color = { 255, 0, 0},                      --- Have a custom chat plugin? Want to change the text format of messages?
            multiline = true,                          --- Edit the TriggerClientEvent() function so it fits your needs!
            args = {"[StaffWatch] "..message}          ----------------------------------------------------------------------------
@@ -135,10 +135,55 @@ RegisterCommand(
                 return
             end
             sendMessage('Report Sent!', source)
+
+            -- send to online staff members
+            local reportedName = GetPlayerName(id) .. ' (' .. id .. ')'
+            local reporterName = GetPlayerName(source) .. ' (' .. source .. ')'
+
+            for _, serverid in ipairs(GetPlayers()) do
+                local staffsteam = splitstring(GetPlayerIdentifier(serverid, 0), ":")[2]
+                PerformHttpRequest(staffwatch .. '/api/checkstaff?steam=' .. staffsteam .. '&secret=' .. Config.secret, function(status, res, head)
+                    if res == 'true' then
+                        sendMessage(reportedName .. ' was report by ' .. reporterName .. ' for ' .. reason, serverid)
+                    end
+                end)
+            end
         end)
     end,
     false
 )
+
+-- Freeze User
+RegisterCommand("freeze", function(source, args, rawCommand)
+    local steam = splitstring(GetPlayerIdentifier(source, 0), ":")[2]
+    local id = table.remove(args, 1)
+
+    local url = staffwatch..'/api/checkstaff?secret='..Config.secret..'&steam='..steam
+    PerformHttpRequest(url, function(statusCode, response, headers)
+        if response == 'true' then
+            TriggerClientEvent('setFrozen', id, true)
+            sendMessage('User frozen!', source)
+        else
+            sendMessage('You must be staff to freeze users!', source)
+        end
+    end)
+end, false)
+
+-- Unfreeze User
+RegisterCommand("unfreeze", function(source, args, rawCommand)
+    local steam = splitstring(GetPlayerIdentifier(source, 0), ":")[2]
+    local id = table.remove(args, 1)
+
+    local url = staffwatch..'/api/checkstaff?secret='..Config.secret..'&steam='..steam
+    PerformHttpRequest(url, function(statusCode, response, headers)
+        if response == 'true' then
+            TriggerClientEvent('setFrozen', id, false)
+            sendMessage('User unfrozen!', source)
+        else
+            sendMessage('You must be staff to unfreeze users!', source)
+        end
+    end)
+end, false)
 
 -- Warn User
 RegisterCommand(
